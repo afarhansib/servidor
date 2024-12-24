@@ -25,7 +25,6 @@
   "homepage": "https://github.com/afarhansib/servidor#readme",
   "dependencies": {
     "baileys": "^6.7.9",
-    "canvas": "^3.0.0",
     "sharp": "^0.32.6"
   },
   "devDependencies": {
