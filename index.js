@@ -160,6 +160,16 @@ const handleNewMessage = async (message, servidor) => {
             const generatedImage = await generateTiro(command?.params)
             const style = generatedImage[1]
 
+            // await servidor.sendMessage(
+            //     sender,
+            //     {
+            //         document: Buffer.from(generatedImage[2], 'utf-8'),
+            //         mimetype: 'image/svg+xml',
+            //         fileName: command.params.text + ' - tiro - ' + new Date() + '.svg',
+            //         caption: `Style: ${style.name} by ${style.author}`
+            //     },
+            //     { quoted: message }
+            // )
             await servidor.sendMessage(
                 sender,
                 {
@@ -168,6 +178,22 @@ const handleNewMessage = async (message, servidor) => {
                 },
                 { quoted: message }
             )
+            // await servidor.sendMessage(
+            //     sender,
+            //     {
+            //         document: generatedImage[0],
+            //         mimetype: 'image/png',
+            //         fileName: command.params.text + ' - tiro - ' + new Date() + '.png',
+            //         caption: `Style: ${style.name} by ${style.author}`
+            //     },
+            //     { quoted: message }
+            // )
+
+            // await servidor.sendMessage(
+            //     sender,
+            //     { text: generatedImage[2] },
+            //     { quoted: message }
+            // )
 
         } catch (error) {
             console.error('Error generating image:', error)

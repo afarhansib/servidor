@@ -10,9 +10,14 @@ const createSvgFromMatrix = (options) => {
         })
         : null || styles[Math.floor(Math.random() * styles.length)]
 
+        const normalize = str => str?.toLowerCase().replace(/[\s\-_]/g, '')
+
+        const fontName = options.font || style.settings.font
+
+        const font = Object.entries(fonts).find(([name]) => normalize(name) === normalize(fontName))?.[1]
+
     const {
         text = 'Yotbu',
-        font = fonts[style.settings.font],
         textColor = style.settings.textColor,
         patterns = style.patterns,
         leftWidth = style.settings.leftWidth,
@@ -113,7 +118,7 @@ const generateTiro = async (options) => {
         .png()
         .toBuffer()
 
-    return [generatedImage, style]
+    return [generatedImage, style, svg]
 }
 
 module.exports = { generateTiro }
