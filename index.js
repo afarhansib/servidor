@@ -6,6 +6,10 @@ const groups = [
     {
         id: '120363350080547462@g.us',
         app: 'tiro',
+    },
+    {
+        id: '120363228429426309@g.us',
+        app: 'tiro',
     }
 ]
 
@@ -135,7 +139,7 @@ const handleNewMessage = async (message, servidor) => {
     const participant = message?.key?.participant
     if (!senderGroup) return
 
-    const messageText = message?.message?.conversation
+    const messageText = message?.message?.conversation || message?.message?.extendedTextMessage?.text
     const command = parseCommand(messageText, senderGroup)
     console.log('Message received:', JSON.stringify(command, null, 2))
 
