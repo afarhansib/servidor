@@ -59,8 +59,7 @@ function formatNestedPattern(pattern, getColorIndex) {
 
 export function decodeStyle(encoded) {
     try {
-        // console.log(encoded)
-        const [id, name, author, colorsStr, patternsStr, font, textColor, widthsStr, mirrorsStr] = encoded.split('|');
+        const [id, name, author, colorsStr, patternsStr, font, textColor, widthsStr, mirrorsStr, verificationStatus] = encoded.split('|');
         
         // Reconstruct color palette
         const colors = colorsStr.split(',');
@@ -68,7 +67,14 @@ export function decodeStyle(encoded) {
         const [leftWidth, middleWidth, rightWidth] = widthsStr.split(',').map(Number);
         const [mirrorLeft, mirrorRight] = mirrorsStr.split(',').map(v => v === '1');
         
-        const [leftPattern, middlePattern, rightPattern] = patternsStr.split(';');
+        const [leftPattern, middlePattern, rightPattern] = patternsStr.split(';')
+
+        let isLocal
+
+        if (!verificationStatus) {
+            // console.log(verificationStatus)
+            isLocal = true
+        }
 
         return {
             id,
@@ -87,7 +93,9 @@ export function decodeStyle(encoded) {
                 rightWidth,
                 mirrorLeft,
                 mirrorRight
-            }
+            },
+            verified: verificationStatus === 'verified', // Will be true or false
+            isLocal
         };
     } catch (error) {
         console.error('Decoding error:', error);

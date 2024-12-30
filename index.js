@@ -1,6 +1,7 @@
 const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, delay } = require('baileys')
 const { generateTiro } = require('./tiro')
 const cloudyPlayers = require('./cloudy-player')
+const { getStyles } = require('./tiro/styles')
 
 const groups = [
     {
@@ -48,14 +49,14 @@ async function connectToWhatsApp() {
     servidor.ev.on('creds.update', saveCreds)
 }
 
-const sendMessageWTyping = async (servidor, msg, jid, key) => {
+const sendMessageWTyping = async (servidor, msg, jid, key, quoted) => {
     await servidor.presenceSubscribe(jid)
     await delay(500)
     await servidor.sendPresenceUpdate('composing', jid)
     await servidor.readMessages(key)
     await delay(2000)
     await servidor.sendPresenceUpdate('paused', jid)
-    await servidor.sendMessage(jid, msg)
+    await servidor.sendMessage(jid, msg, quoted)
 }
 
 const hasApp = (group, appName) => {
@@ -157,6 +158,29 @@ const handleNewMessage = async (message, servidor) => {
                 command.params.text = player?.gt || getDefaultText()
             }
 
+            if (command.params.style === '') {
+                const styles = await getStyles()
+                const styleNames = styles.map(s => {
+                    let styleInfo = '*' + s.name + '*'
+                    if (s.author) {
+                        styleInfo += ` by ${s.author}`
+                    }
+                    if (!s.verified) {
+                        styleInfo += ' (unverified)'
+                    }
+                    return styleInfo
+                }).join('\n')
+            
+                await sendMessageWTyping(
+                    servidor,
+                    { text: 'Available styles ('+ styles?.length +'): \n\n' + styleNames },
+                    sender,
+                    [message.key],
+                    { quoted: message }
+                )
+                return
+            }
+
             const generatedImage = await generateTiro(command?.params)
             const style = generatedImage[1]
 
@@ -170,14 +194,28 @@ const handleNewMessage = async (message, servidor) => {
             //     },
             //     { quoted: message }
             // )
-            await servidor.sendMessage(
-                sender,
+            // await servidor.sendMessage(
+            //     sender,
+            //     {
+            //         image: generatedImage[0],
+            //         caption: `Style: ${style.name} by ${style.author}`
+            //     },
+            //     { quoted: message }
+            // )
+
+            const isUnverified = style.verified === false ? ' (unverified)' : ''
+
+            await sendMessageWTyping(
+                servidor,
                 {
                     image: generatedImage[0],
-                    caption: `Style: ${style.name} by ${style.author}`
+                    caption: `Style: ${style.name} by ${style.author}` + isUnverified
                 },
+                sender,
+                [message.key],
                 { quoted: message }
             )
+
             // await servidor.sendMessage(
             //     sender,
             //     {
@@ -197,9 +235,16 @@ const handleNewMessage = async (message, servidor) => {
 
         } catch (error) {
             console.error('Error generating image:', error)
-            await servidor.sendMessage(
+            // await servidor.sendMessage(
+            //     sender,
+            //     { text: 'Sorry, there was an error generating the image.' },
+            //     { quoted: message }
+            // )
+            await sendMessageWTyping(
+                servidor,
+                { text: 'Error generating image:\n```' + error.message + '```'},
                 sender,
-                { text: 'Sorry, there was an error generating the image.' },
+                [message.key],
                 { quoted: message }
             )
         }

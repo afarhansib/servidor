@@ -1,19 +1,18 @@
 const sharp = require('sharp')
-const { styles } =require("./tiro/styles")
 const { fonts } =require("./tiro/fonts")
-const { decodeStyle } =require("./tiro/style-encoder")
+const { getStyles } = require('./tiro/styles')
 
-const drawGlyph = (options) => {
+const drawGlyph = async options => {
     // Your existing style and font setup code remains the same
-    const decodedStyle = styles.map(style => decodeStyle(style))
-    const encodedStyle = options.style
-        ? decodedStyle.find(s => {
+    const styles = await getStyles()
+    const style = await options.style
+        ? styles.find(s => {
             const normalize = str => str?.toLowerCase().replace(/[\s\-_]/g, '')
             return normalize(s.name) === normalize(options.style)
         })
         : null || styles[Math.floor(Math.random() * styles.length)]
 
-    const style = encodedStyle
+    // console.log('from line 42: ' + style)
     const normalize = str => str?.toLowerCase().replace(/[\s\-_]/g, '')
     const fontName = options.font || style.settings.font
     // console.log(fontName)
@@ -208,7 +207,7 @@ const getGradientCoordinates = (direction, textMetrics) => {
 }
 
 const generateTiro = async (options) => {
-    const { svg, width, height, style } = drawGlyph(options)
+    const { svg, width, height, style } = await drawGlyph(options)
 
     const smallPng = await sharp(Buffer.from(svg))
         .resize(width, height, {
